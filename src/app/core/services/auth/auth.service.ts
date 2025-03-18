@@ -3,11 +3,10 @@ import { PlatFormService } from '../platform/platform.service';
 import { BehaviorSubject } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
-import { AuthAPISKPService } from 'AuthAPIS-KP';
-
+import { AuthAPISKPService } from 'auth-apis-kp';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly _router = inject(Router);
@@ -20,7 +19,10 @@ export class AuthService {
   constructor() {
     this._authAPISKPService.userData.subscribe((data) => {
       if (data && data.token) {
-        this._platformService.safeLocalStorageSet(this._userTokenKey, data.token);
+        this._platformService.safeLocalStorageSet(
+          this._userTokenKey,
+          data.token
+        );
         this._updateUserData(data.token);
       }
     });
@@ -66,7 +68,6 @@ export class AuthService {
     try {
       const decodedToken: any = jwtDecode(token);
       this.userData.next(decodedToken);
-
     } catch (error) {
       console.error('Invalid token:', error);
       this.logout();

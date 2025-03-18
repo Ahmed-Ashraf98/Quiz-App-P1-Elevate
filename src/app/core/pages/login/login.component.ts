@@ -1,10 +1,15 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth/auth.service';
 import { NotificationService } from '../../../shared/services/notification/notification.service';
-import { AuthAPISKPService } from 'AuthAPIS-KP';
+import { AuthAPISKPService } from 'auth-apis-kp';
 
 @Component({
   selector: 'app-login',
@@ -32,7 +37,9 @@ export class LoginComponent implements OnInit, OnDestroy {
     email: new FormControl(null, [Validators.required, Validators.email]),
     password: new FormControl(null, [
       Validators.required,
-      Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$'),
+      Validators.pattern(
+        '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$'
+      ),
     ]),
   });
 
@@ -94,24 +101,26 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.apiError.set('');
 
-    this.loginSub = this._authAPISKPService.login(this.loginForm.value).subscribe({
-      next: (res) => {
-        if ('token' in res && res.message === 'success') {
-          this._authService.userData.next(res);
-          console.log('Login success', res);
-          this._notificationService.success('Login successful!');
-        } else {
-          this.apiError.set('Invalid response from server.');
+    this.loginSub = this._authAPISKPService
+      .login(this.loginForm.value)
+      .subscribe({
+        next: (res) => {
+          if ('token' in res && res.message === 'success') {
+            this._authService.userData.next(res);
+            console.log('Login success', res);
+            this._notificationService.success('Login successful!');
+          } else {
+            this.apiError.set('Invalid response from server.');
+            this._notificationService.error('Email or Password is incorrect!');
+          }
+        },
+        error: (err) => {
+          console.error('Login failed', err);
           this._notificationService.error('Email or Password is incorrect!');
-        }
-      },
-      error: (err) => {
-        console.error('Login failed', err);
-        this._notificationService.error('Email or Password is incorrect!');
-      },
-      complete: () => {
-        this.isLoading.set(false);
-      },
-    });
+        },
+        complete: () => {
+          this.isLoading.set(false);
+        },
+      });
   }
 }
